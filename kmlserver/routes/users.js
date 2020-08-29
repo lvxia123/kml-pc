@@ -44,7 +44,8 @@ router.post('/login/v1',(req,res)=>{
      if(err) throw err;
 	//  console.log(result);
 	 if(result.length==1){
-		res.send({message:"登录成功",code:1})
+		res.send({message:"登录成功",code:1,result:result[0]})
+		console.log(result)
 	 }else{
 		res.send({message:"登录失败",code:0});
 	 }

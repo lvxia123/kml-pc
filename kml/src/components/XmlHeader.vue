@@ -11,7 +11,7 @@
             <li>
                 <router-link to="/car">
                     <img src="img/index/top-cart.928e66c.png" alt="购物车">
-                    <span v-text="count"></span>
+                    <span >{{$store.getters.getAllCount}}</span>
                 </router-link>
             </li>
             <li><router-link to="">我的订单</router-link></li>
@@ -49,6 +49,7 @@
 </template>
 
 <script>
+    import {mapState,mapMutations,getters} from 'vuex'
     import {axiosGet,axiosPost} from '../utils/request.js'
     export default {
         data(){
@@ -70,7 +71,7 @@
             },
             logout(){
                this.$store.commit('logout_mutations');
-               //this.$router.push('/register');
+               //this.$router.push('/register'); 
             },
         },
         created(){

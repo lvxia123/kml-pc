@@ -58,7 +58,7 @@
                 </div>
                 <div class="proudct-right-shopping">
                     <a href="javascript:;" class="proudct-right-shopping-car" @click="shoppingCar()">加入购物车</a>
-                    <a href="javascript:;" class="proudct-right-shopping-buy" @click="shoppingCar()">立刻购买</a>
+                    <a href="javascript:;" class="proudct-right-shopping-buy" >立刻购买</a>
                 </div>
                 
             </div>
@@ -91,6 +91,7 @@
     </div>
 </template>
 <script>
+import { mapMutations, mapState } from 'vuex'
 export default {
     props:[ "lid" ],
     data(){
@@ -109,15 +110,14 @@ export default {
         } 
     },
     methods:{
+        ...mapMutations(['setCart']),  // 语法糖 进行映射 --> this.setCart()
+        ...mapState(['cart']),
         // 事件委托切换图片函数
         changei(e){
             if(e.target.nodeName == 'IMG'){
                 this.i=e.target.dataset.i;
             }
         },
-        // changei(i){
-        //     this.i=i;
-        // },
         loadPage(){
             this.axios.get("/details/v1",{
                 params:{ lid: this.lid } //vue第三天axios
@@ -145,31 +145,43 @@ export default {
                 this.num--;
             }
         },
-        // 1.将数据放入缓存
+        // 1.将数据放入存
+        shoppingCar(){
+            var shop={
+                is_checked:true,
+                pid:this.specs[this.specchang].cid,
+                title:this.product.title,
+                spec:this.specs[this.specchang].spec,
+                price:this.specs[this.specchang].price*this.num,
+                count:this.num,
+                img:this.pics[0].sm
+            };
+            console.log(shop);
+            // 暂存数据
+            this.$store.commit('addToCart',shop)
+            alert('添加成功')
+            
+            // shop=JSON.stringify(shop);
+            // localStorage.setItem('shopcart',shop);
+            // this.$router.push('/car');
+        },
+        
+        // 2.将数据直接加入数据库
         // shoppingCar(){
-        //     var shop={pid:this.product.cid,title:this.product.subtitle,spec:this.product.spec,price:this.product.price,count:this.num};
-        //     console.log(shop);
-        //     // 加入缓存
-        //     shop=JSON.stringify(shop);
-        //     localStorage.setItem('shopcart',shop);
+        //     let num=this.num;
+        //     // 判断是否有不同的规格选项
+        //     if(this.specs.length>1){
+        //         var pid=this.specid;
+        //     }else{
+        //         var pid=this.product.cid;
+        //     }
+        //     console.log(num)
+        //     console.log(pid)
+        //     this.axios.get('/cartItems/v1/add?pid='+pid+'&num='+num).then(res=>{
+        //         console.log(res.data);
+        //     });
         //     this.$router.push('/car');
         // }
-        // 2.将数据直接加入数据库
-        shoppingCar(){
-            let num=this.num;
-            // 判断是否有不同的规格选项
-            if(this.specs.length>1){
-                var pid=this.specid;
-            }else{
-                var pid=this.product.cid;
-            }
-            console.log(num)
-            console.log(pid)
-            this.axios.get('/cartItems/v1/add?pid='+pid+'&num='+num).then(res=>{
-                // console.log(res.data);
-            });
-            this.$router.push('/car');
-        }
     },
     created(){
         console.log(this.lid);

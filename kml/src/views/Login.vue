@@ -58,9 +58,11 @@ export default {
            this.axios.post('/users/login/v1','phone='+this.phone+'&password='+this.password).then(res=>{
                console.log(res.data)
                if(res.data.code == 1){
-                    localStorage.setItem('isLogined',true);
                     //修改Vuex中的state
-                    this.$store.commit('logined_mutations');
+                    this.$store.commit('logined_mutations',res.data.result);
+                    localStorage.setItem('isLogined',true);
+                    localStorage.setItem('uid',res.data.result.uid);
+                    localStorage.setItem('phone',res.data.result.phone);
                     this.$router.push('/');
                }else{
                    alert("对不起,用户或密码错误");

@@ -42,8 +42,8 @@
                    <span class="list-text" v-text="`¥${i.price.toFixed(2)}`"></span>
                  </p>
                  <div class="index-list-right-buy">
-                   <router-link to="/login" class="index-list-right-sbuy fl tc">快速购买</router-link>
-                   <router-link to="/login" class="index-right-right-shopping fl tc">加入购物车</router-link>
+                   <router-link to="" class="index-list-right-sbuy fl tc">快速购买</router-link>
+                   <router-link :to="`/details/${i.pid}`" class="index-right-right-shopping fl tc">加入购物车</router-link>
                  </div>
                </div>
              </li>
@@ -80,7 +80,7 @@
         //  获取背景色对象
          bg:{},
         // nav表单选中的下标
-         currentIndex: '',
+         currentIndex: '0',
         //  初始页码   
          page:1,
         //  服务器返回来的总的页码数
@@ -94,7 +94,7 @@
     methods:{
       //  点击商品分类列表将列表id传给url
         goto(lid){
-        console.log(lid);
+        // console.log(lid);
         this.$router.push(`/goods/${lid}`);
         this.currentIndex=lid;
         // console.log(this.currentIndex);
@@ -115,6 +115,7 @@
       //地址栏不变化但有参数  
       //  判断得到的参数 执行全局查找
        if(this.lid==0){
+         console.log(this.lid)
           this.axios.get(
           '/goods/v1/list?page='+this.page).then(res=>{
            this.goodsall=res.data.results;
@@ -158,6 +159,7 @@
     //  分类查询监听地址栏变化
      $route(){
        this.lid=this.$route.params.lid;
+      //  console.log(this.lid)
       //  地址栏变化，更新页面时，页码恢复默认第一页
        this.page = 1; 
        this.load()

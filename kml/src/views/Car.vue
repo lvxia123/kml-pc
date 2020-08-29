@@ -19,7 +19,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="(item,i) of carItems" :key="i">
-                        <td><input type="checkbox" v-model="item.is_checked"></td>
+                        <!-- <td><input type="checkbox" checked="item.is_checked"></td> -->
                         <td class="img">
                             <img :src="item.img" alt="">
                         </td>
@@ -29,16 +29,16 @@
                         <td>
                             <div class="number">
                                 <span class="jian">
-                                    <button @click="change(-1,i)">-</button>
+                                    <button @click="minList(item)">-</button>
                                 </span>
                                 <span class="num" v-text="item.count"></span>
                                 <span class="jia">
-                                    <button @click="change(+1,i)">+</button>
+                                    <button @click="addList(item)">+</button>
                                 </span>
                             </div>
                         </td>
                         <td v-text="`¥${item.price.toFixed(2)*item.count}`"></td>
-                        <td><button @click="del(i)">×</button></td>
+                        <td><button @click="del(item)">×</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -48,78 +48,78 @@
             </div>
             <div class="car-put tr">
                 <router-link  to="/goods/0" class="tc">继续购买</router-link>
-                <router-link to="/order/add" class="tc">去结账</router-link>
+                <a @click="checkout()" href="javascript:;" class="tc">去结账</a>
             </div>
         </div>
     </div>
 </template>
 <script>
+import { mapMutations,mapGetters, mapState } from 'vuex'
 export default {
     data(){
         return {
-            carItems:[]
-            // shcart:''
+            carItems:[],
+            // noLogin:false,
+            // phone:{}
         }
     },
     methods:{
-        // 1.从数据库获取数据
-        loadCar(){
-            this.axios.get('/cartItems/v1/list').then(res=>{
-                if(res.data.result!=0){
-                    this.carItems=res.data.result
-                }else{
-                    this.carItems=0
-                }
-                console.log(res.data.result)
-            })
+        ...mapState(['phone','uid']),
+        ...mapGetters(['getCart']),
+        ...mapMutations(['addCart','minCart','clearCart','delCart']),
+        getFromCart(i){
+            this.carItems = this.getCart()
+            // this.carItems = this.$store.state.cart
+            console.log(this.carItems)
         },
-        // Uppdate(){
-        //     this.axios.get('/carItems/v1/update?pid='+)
-        // },
+        addList(i){
+            this.addCart(i);
+        },
+        minList(i){
+            this.minCart(i);
+        },
         del(i){
-                console.log(i)
-                let pid=this.carItems[i].product_id;
-                console.log(pid);
-                this.axios.get('/cartItems/v1/delete?pid='+pid).then(res=>{
-                });
-                this.loadCar();
-        },
-        change(n,i){
-           let pid=this.carItems[i].product_id;
-        //    console.log(pid)
-           let count=this.carItems[i].count;
-           count+=n;
-           console.log(count);
-           
-           this.axios.get('/cartItems/v1/update?pid='+pid+'&count='+count).then(res=>{    
-           });
-           this.loadCar();
-        //    console.log(count)
-        //    if(count==0){
-        //       this.carItems.splice(i,1); 
-        //    }
+            this.delCart(i);
         },
        
+        // 结算
+        checkout(){
+            this.phone = JSON.parse(localStorage.getItem('phone'))
+            console.log(this.phone)
+            if(!this.phone){
+                console.log(this.phone)
+                alert('您还没登陆')
+                this.$router.push('/login')
+            }else{
+                for(var i of this.carItems){
+                    i.uid =  localStorage.getItem('uid')
+                    console.log(i.uid)
+                }
+                let data = {carItems:this.carItems}
+                this.axios.post('/cartItems/v1/add',this.$qs.stringify(data)).then(res=>{
+                    console.log(res.data)
+                     alert('即将跳入支付页面')
+                }).then(()=>{
+                    // 结算后 清空 购物车
+                    this.clearCart();
+                })
+            }
+        }
     },
     computed:{
         total(){
             let total=0
             for(let p of this.carItems){
-                //  if(p.count)
-                total+=p.price*p.count;
+                 total+=p.price*p.count;    
             }
             return total;
         }
     },
     created(){
-        this.loadCar();
-        // 2.从缓存中获取数据
-        // let scart = localStorage.getItem('shopcart');
-        // this.shcart=JSON.parse(scart);
-        // console.log(this.shcart)
     },
     mounted(){
-        this.loadCar();
+        this.getFromCart()
+        // this.unLogin()
     }
 }
 </script>
